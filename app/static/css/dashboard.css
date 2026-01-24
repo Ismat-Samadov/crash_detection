@@ -1,0 +1,500 @@
+/* ================================================
+   SCADA Dashboard - Industrial Theme
+   ================================================ */
+
+/* Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+    background: linear-gradient(135deg, #0a0e1a 0%, #1a1f2e 100%);
+    color: #e0e6ed;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Header */
+.header {
+    background: linear-gradient(to right, #1a2332, #2a3a4a);
+    border-bottom: 3px solid #00d4ff;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(0, 212, 255, 0.3);
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo-icon {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, #00d4ff, #00ff88);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: pulse 2s ease-in-out infinite;
+}
+
+.logo-text h1 {
+    font-size: 1.5rem;
+    color: #00d4ff;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+
+.logo-text p {
+    font-size: 0.8rem;
+    color: #8899aa;
+    margin-top: 0.2rem;
+}
+
+.system-time {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #00ff88;
+    font-family: 'Courier New', monospace;
+    text-shadow: 0 0 10px rgba(0, 255, 136, 0.5);
+}
+
+.status-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.status-dot {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    animation: blink 2s ease-in-out infinite;
+}
+
+.status-active {
+    background: #00ff88;
+    box-shadow: 0 0 10px rgba(0, 255, 136, 0.7);
+}
+
+/* Dashboard Grid */
+.dashboard {
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+/* Station Cards Grid */
+.station-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.station-card {
+    background: linear-gradient(135deg, #1a2332 0%, #2a3a4a 100%);
+    border: 2px solid #3a4a5a;
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.station-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 4px;
+    background: linear-gradient(90deg, #00ff88, #00d4ff);
+}
+
+.station-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 212, 255, 0.3);
+    border-color: #00d4ff;
+}
+
+#station-sumqayit::before {
+    background: linear-gradient(90deg, #ffa500, #ff6b00);
+}
+
+.station-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #3a4a5a;
+}
+
+.station-header h3 {
+    color: #00d4ff;
+    font-size: 1.1rem;
+    letter-spacing: 1px;
+}
+
+.station-status {
+    padding: 0.3rem 0.8rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.status-normal {
+    background: rgba(0, 255, 136, 0.2);
+    color: #00ff88;
+    border: 1px solid #00ff88;
+}
+
+.status-warning {
+    background: rgba(255, 165, 0, 0.2);
+    color: #ffa500;
+    border: 1px solid #ffa500;
+}
+
+.status-alert {
+    background: rgba(255, 50, 50, 0.2);
+    color: #ff3232;
+    border: 1px solid #ff3232;
+    animation: alertPulse 1s ease-in-out infinite;
+}
+
+.station-metrics {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+}
+
+.metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+}
+
+.metric-label {
+    color: #8899aa;
+    font-size: 0.85rem;
+}
+
+.metric-value {
+    color: #00d4ff;
+    font-weight: 700;
+    font-size: 1.1rem;
+    font-family: 'Courier New', monospace;
+}
+
+.anomaly-indicator {
+    margin-top: 1rem;
+    padding: 0.8rem;
+    background: rgba(0, 212, 255, 0.1);
+    border-left: 3px solid #00d4ff;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+.anomaly-indicator.alert {
+    background: rgba(255, 50, 50, 0.2);
+    border-left-color: #ff3232;
+    color: #ff3232;
+    animation: alertPulse 1s ease-in-out infinite;
+}
+
+/* Pipeline Visualization */
+.pipeline-section {
+    background: linear-gradient(135deg, #1a2332 0%, #2a3a4a 100%);
+    border: 2px solid #3a4a5a;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.section-header {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #00d4ff;
+}
+
+.section-header h2 {
+    color: #00d4ff;
+    font-size: 1.3rem;
+    letter-spacing: 2px;
+}
+
+.pipeline-visualization {
+    background: #0a0e1a;
+    border-radius: 8px;
+    padding: 2rem;
+    min-height: 300px;
+}
+
+.station-indicator {
+    animation: pulse 2s ease-in-out infinite;
+}
+
+/* Monitoring Grid (Charts + Alerts) */
+.monitoring-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 1.5rem;
+}
+
+.chart-container {
+    background: linear-gradient(135deg, #1a2332 0%, #2a3a4a 100%);
+    border: 2px solid #3a4a5a;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.chart-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid #3a4a5a;
+}
+
+.chart-header h3 {
+    color: #00d4ff;
+    font-size: 1rem;
+    letter-spacing: 1px;
+}
+
+.chart-live-indicator {
+    color: #00ff88;
+    font-size: 0.75rem;
+    animation: blink 2s ease-in-out infinite;
+}
+
+canvas {
+    max-height: 250px;
+}
+
+/* Alert Panel */
+.alert-panel {
+    background: linear-gradient(135deg, #1a2332 0%, #2a3a4a 100%);
+    border: 2px solid #3a4a5a;
+    border-radius: 8px;
+    padding: 1.5rem;
+}
+
+.alert-stats {
+    color: #8899aa;
+    font-size: 0.85rem;
+}
+
+.alert-stats strong {
+    color: #00d4ff;
+    font-size: 1.1rem;
+}
+
+.alert-list {
+    max-height: 250px;
+    overflow-y: auto;
+    margin-top: 1rem;
+}
+
+.alert-empty {
+    color: #00ff88;
+    text-align: center;
+    padding: 2rem;
+    font-style: italic;
+}
+
+.alert-item {
+    background: rgba(255, 50, 50, 0.1);
+    border-left: 3px solid #ff3232;
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    border-radius: 4px;
+    animation: slideIn 0.3s ease-out;
+}
+
+.alert-item .alert-time {
+    color: #8899aa;
+    font-size: 0.75rem;
+    margin-bottom: 0.3rem;
+}
+
+.alert-item .alert-location {
+    color: #ff3232;
+    font-weight: 700;
+    margin-bottom: 0.3rem;
+}
+
+.alert-item .alert-message {
+    color: #e0e6ed;
+    font-size: 0.85rem;
+}
+
+/* Statistics Panel */
+.stats-panel {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.stat-box {
+    background: linear-gradient(135deg, #1a2332 0%, #2a3a4a 100%);
+    border: 2px solid #3a4a5a;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.stat-box:hover {
+    transform: translateY(-3px);
+    border-color: #00d4ff;
+}
+
+.stat-label {
+    color: #8899aa;
+    font-size: 0.85rem;
+    margin-bottom: 0.8rem;
+}
+
+.stat-value {
+    color: #00d4ff;
+    font-size: 1.5rem;
+    font-weight: 700;
+    font-family: 'Courier New', monospace;
+}
+
+/* Connection Status Overlay */
+.connection-status {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.connection-status.hidden {
+    display: none;
+}
+
+.status-message {
+    background: #1a2332;
+    border: 2px solid #00d4ff;
+    border-radius: 8px;
+    padding: 2rem 3rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 1.1rem;
+}
+
+.spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid #3a4a5a;
+    border-top: 3px solid #00d4ff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #1a2332;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #3a4a5a;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #00d4ff;
+}
+
+/* Animations */
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.6;
+    }
+}
+
+@keyframes blink {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.3;
+    }
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes alertPulse {
+    0%, 100% {
+        box-shadow: 0 0 5px rgba(255, 50, 50, 0.5);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 50, 50, 0.8);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .station-grid,
+    .monitoring-grid,
+    .stats-panel {
+        grid-template-columns: 1fr;
+    }
+
+    .logo-text h1 {
+        font-size: 1.2rem;
+    }
+}
