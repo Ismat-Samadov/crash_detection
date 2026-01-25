@@ -16,7 +16,7 @@ import asyncio
 import json
 from pathlib import Path
 
-from data_simulator import PipelineDataSimulator
+from .data_simulator import PipelineDataSimulator
 
 # Initialize FastAPI app
 app = FastAPI(title="Gas Pipeline Monitoring System")
