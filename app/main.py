@@ -103,11 +103,8 @@ async def websocket_endpoint(websocket: WebSocket):
                     # Create DataFrame with required features
                     df = pd.DataFrame([data_point])
 
-                    # Extract temporal features
-                    df['hour'] = df['timestamp'].dt.hour
-                    df['day_of_week'] = df['timestamp'].dt.dayofweek
-                    df['month'] = df['timestamp'].dt.month
-                    df['year'] = df['timestamp'].dt.year
+                    # NOTE: Temporal features (hour, day_of_week, month, year) excluded
+                    # to make model time-invariant
 
                     # One-hot encode location (use 'loc' prefix to match training)
                     location_dummies = pd.get_dummies(df['location'], prefix='loc')

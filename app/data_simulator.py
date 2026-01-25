@@ -1,181 +1,101 @@
 """
 Real-Time Pipeline Data Simulator
 ==================================
-Generates realistic gas pipeline sensor readings based on historical patterns
+Generates realistic gas pipeline sensor readings by sampling from historical data
 """
 
 import numpy as np
 import pandas as pd
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Dict, Any
+from pathlib import Path
 
 
 class PipelineDataSimulator:
     """
     Simulates real-time gas pipeline sensor data
-    Based on actual operational statistics from Azerbaijan pipeline network
+    Samples from actual historical data to preserve natural sensor correlations
     """
 
     def __init__(self):
-        """Initialize simulator with realistic operational parameters"""
+        """Initialize simulator by loading historical data"""
 
-        # Locations
-        self.locations = ["Mardakan", "Sumqayit", "Turkan"]
+        # Load actual historical data
+        data_dir = Path(__file__).parent.parent / "data"
 
-        # Base operational parameters (from ACTUAL training data statistics)
-        # These MUST match the training data to avoid false anomalies
-        self.base_params = {
-            "density_kg_m3": {
-                "mean": 0.739,
-                "std": 0.014,
-                "min": 0.65,
-                "max": 0.85
-            },
-            "pressure_diff_kpa": {
-                "mean": 9.21,
-                "std": 8.03,
-                "min": 0.0,
-                "max": 69.13
-            },
-            "pressure_kpa": {
-                "mean": 485.65,
-                "std": 95.80,
-                "min": 300.0,
-                "max": 770.97
-            },
-            "temperature_c": {
-                "mean": 16.32,
-                "std": 17.37,
-                "min": -34.57,
-                "max": 50.0
-            },
-            "hourly_flow_m3": {
-                "mean": 8.19,
-                "std": 11.39,
-                "min": 0.0,
-                "max": 56.99
-            }
+        # Load data from all locations
+        mardakan = pd.read_csv(data_dir / "Mardakan.csv")
+        sumqayit = pd.read_csv(data_dir / "Sumqayit.csv")
+        turkan = pd.read_csv(data_dir / "Turkan.csv")
+
+        # Add location column
+        mardakan['location'] = 'Mardakan'
+        sumqayit['location'] = 'Sumqayit'
+        turkan['location'] = 'Turkan'
+
+        # Combine all data
+        all_data = pd.concat([mardakan, sumqayit, turkan], ignore_index=True)
+
+        # Rename columns to match our feature names
+        column_mapping = {
+            'XÜSUSİ ÇƏKİ\n(kq/m3)': 'density_kg_m3',
+            'TƏZYİQLƏR\nFƏRQİ (kPa)': 'pressure_diff_kpa',
+            'TƏZYİQ (kPa)': 'pressure_kpa',
+            'TEMPERATUR\n(C)': 'temperature_c',
+            'SAATLIQ\nSƏRF(min m3)': 'hourly_flow_m3',
+            'SƏRF (min m3)': 'total_flow_m3',
+            'TARİX': 'timestamp'
         }
+        all_data = all_data.rename(columns=column_mapping)
 
-        # Location-specific adjustments
-        # Sumqayit has 40% higher anomaly rate - simulate slightly different operation
-        self.location_adjustments = {
-            "Mardakan": {"pressure_mult": 1.0, "flow_mult": 1.0},
-            "Sumqayit": {"pressure_mult": 1.05, "flow_mult": 0.95},  # Slightly elevated pressure
-            "Turkan": {"pressure_mult": 0.98, "flow_mult": 1.02}
+        # Filter out summary rows (rows where timestamp contains "Cəmi")
+        all_data = all_data[~all_data['timestamp'].astype(str).str.contains('Cəmi', na=False)]
+
+        # Convert timestamp to datetime
+        all_data['timestamp'] = pd.to_datetime(all_data['timestamp'], format='%d-%m-%Y %H:%M')
+
+        # Drop rows with NaN values
+        all_data = all_data.dropna()
+
+        # Store the clean data pool
+        self.data_pool = all_data.reset_index(drop=True)
+
+        print(f"✓ Data simulator initialized with {len(self.data_pool):,} historical samples")
+
+        # Noise levels for perturbation (±0.5% variation to preserve correlations)
+        self.noise_levels = {
+            'density_kg_m3': 0.005,
+            'pressure_diff_kpa': 0.005,
+            'pressure_kpa': 0.005,
+            'temperature_c': 0.005,
+            'hourly_flow_m3': 0.005,
+            'total_flow_m3': 0.005
         }
-
-        # Time-based patterns
-        # Midnight shows 3x higher anomaly rate
-        self.hourly_risk = {
-            0: 2.82,   # Midnight - highest risk
-            23: 1.71,  # Late night
-            12: 1.31,  # Noon peak
-            13: 1.61   # Afternoon peak
-        }
-
-        # Simulation state
-        self.current_location_idx = 0
-        # Initialize cumulative flow to match training data range (0 to 1367.77)
-        self.cumulative_flow = np.random.uniform(0, 1000)
-        self.last_timestamp = datetime.now()
-
-    def _get_hourly_multiplier(self, hour: int) -> float:
-        """
-        Get demand multiplier based on hour of day
-        Peak demand during day, lower at night
-        REDUCED multipliers to stay within training data range
-        """
-        # Base pattern: higher during day (7-22), lower at night (23-6)
-        if 7 <= hour <= 22:
-            return np.random.uniform(1.0, 1.1)  # Day - slightly higher demand
-        elif 3 <= hour <= 6:
-            return np.random.uniform(0.9, 0.95)   # Early morning - slightly lower demand
-        else:
-            return np.random.uniform(0.95, 1.05)  # Night/transition
-
-    def _inject_anomaly(self, data: Dict[str, float], hour: int) -> Dict[str, float]:
-        """
-        Occasionally inject anomalies based on hour-specific risk
-        """
-        # Get risk for current hour (default 1% if not specified)
-        risk_pct = self.hourly_risk.get(hour, 1.0)
-        risk_probability = risk_pct / 100.0
-
-        if np.random.random() < risk_probability:
-            # Create anomaly by deviating multiple sensors (system-level issue)
-            anomaly_type = np.random.choice([
-                "pressure_spike",
-                "flow_drop",
-                "temperature_surge",
-                "density_variation"
-            ])
-
-            if anomaly_type == "pressure_spike":
-                data["pressure_kpa"] *= np.random.uniform(1.3, 1.6)
-                data["pressure_diff_kpa"] *= np.random.uniform(1.4, 1.8)
-
-            elif anomaly_type == "flow_drop":
-                data["hourly_flow_m3"] *= np.random.uniform(0.4, 0.6)
-                data["pressure_diff_kpa"] *= np.random.uniform(0.5, 0.7)
-
-            elif anomaly_type == "temperature_surge":
-                data["temperature_c"] += np.random.uniform(15, 30)
-
-            elif anomaly_type == "density_variation":
-                data["density_kg_m3"] *= np.random.uniform(1.15, 1.35)
-
-        return data
 
     def generate_data_point(self) -> Dict[str, Any]:
         """
-        Generate a single realistic data point
+        Generate a single realistic data point by sampling from historical data
         """
-        # Rotate through locations
-        location = self.locations[self.current_location_idx]
-        self.current_location_idx = (self.current_location_idx + 1) % len(self.locations)
+        # Randomly sample a row from historical data
+        sample_idx = np.random.randint(0, len(self.data_pool))
+        sample = self.data_pool.iloc[sample_idx].copy()
 
-        # Current timestamp
-        timestamp = datetime.now()
-        hour = timestamp.hour
+        # Add small random perturbations to make each sample unique
+        # This preserves correlations while adding variability
+        for sensor, noise_level in self.noise_levels.items():
+            if sensor in sample:
+                # Add noise: ± noise_level percent of the value
+                noise = np.random.uniform(-noise_level, noise_level)
+                sample[sensor] = sample[sensor] * (1 + noise)
 
-        # Location-specific adjustments
-        loc_adj = self.location_adjustments[location]
+                # Ensure non-negative values for physical sensors
+                if sample[sensor] < 0:
+                    sample[sensor] = abs(sample[sensor]) * 0.1
 
-        # Generate base sensor readings
-        data = {}
+        # Update timestamp to current time
+        sample['timestamp'] = datetime.now()
 
-        for sensor, params in self.base_params.items():
-            # Generate value with normal distribution
-            value = np.random.normal(params["mean"], params["std"])
-
-            # Clip to realistic bounds
-            value = np.clip(value, params["min"], params["max"])
-
-            # Apply hourly demand pattern for flow-related sensors
-            if "flow" in sensor or "pressure" in sensor:
-                value *= self._get_hourly_multiplier(hour)
-
-            # Apply location-specific adjustments
-            if "pressure" in sensor:
-                value *= loc_adj["pressure_mult"]
-            elif "flow" in sensor:
-                value *= loc_adj["flow_mult"]
-
-            data[sensor] = value
-
-        # Inject occasional anomalies
-        data = self._inject_anomaly(data, hour)
-
-        # Update cumulative flow
-        self.cumulative_flow += data["hourly_flow_m3"] / 60.0  # Approximate per-minute
-        data["total_flow_m3"] = self.cumulative_flow
-
-        # Add metadata
-        data["timestamp"] = timestamp
-        data["location"] = location
-
-        return data
+        return sample.to_dict()
 
     def generate_batch(self, n: int = 100) -> pd.DataFrame:
         """
@@ -190,7 +110,7 @@ class PipelineDataSimulator:
 if __name__ == "__main__":
     simulator = PipelineDataSimulator()
 
-    print("Testing Pipeline Data Simulator")
+    print("\nTesting Pipeline Data Simulator")
     print("=" * 50)
 
     # Generate sample data

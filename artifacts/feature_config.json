@@ -6,18 +6,14 @@
     "temperature_c",
     "hourly_flow_m3",
     "total_flow_m3",
-    "hour",
-    "day_of_week",
-    "month",
-    "year",
     "loc_Mardakan",
     "loc_Sumqayit",
     "loc_Turkan"
   ],
-  "n_features": 13,
+  "n_features": 9,
   "model_name": "One-Class SVM",
   "contamination_rate": 0.01,
   "random_seed": 42,
   "training_samples": 170289,
-  "training_anomaly_rate": 1.0012390700515006
+  "training_anomaly_rate": 1.000651833060268
 }

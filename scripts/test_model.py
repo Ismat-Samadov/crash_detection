@@ -28,12 +28,6 @@ for i in range(100):
 
 df = pd.DataFrame(test_data)
 
-# Feature engineering (same as in main.py)
-df['hour'] = df['timestamp'].dt.hour
-df['day_of_week'] = df['timestamp'].dt.dayofweek
-df['month'] = df['timestamp'].dt.month
-df['year'] = df['timestamp'].dt.year
-
 # One-hot encode location
 location_dummies = pd.get_dummies(df['location'], prefix='loc')
 df = pd.concat([df, location_dummies], axis=1)
