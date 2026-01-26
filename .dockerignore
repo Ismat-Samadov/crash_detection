@@ -34,9 +34,6 @@ Thumbs.db
 .ipynb_checkpoints/
 notebooks/test_execution.ipynb
 
-# Data files (exclude raw data if large)
-data/*.csv
-
 # Documentation (keep only essential)
 *.md
 !README.md
