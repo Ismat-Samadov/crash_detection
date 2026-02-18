@@ -1,3 +1,0 @@
-"""
-Gas Pipeline Monitoring Application
-"""
