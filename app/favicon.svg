@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#0d1e35"/>
+      <stop offset="100%" stop-color="#030a14"/>
+    </radialGradient>
+    <linearGradient id="pipe" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00d4ff"/>
+      <stop offset="50%" stop-color="#00b8e0"/>
+      <stop offset="100%" stop-color="#00d4ff"/>
+    </linearGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="0.8" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="32" height="32" rx="6" fill="url(#bg)"/>
+  <rect width="32" height="32" rx="6" fill="none" stroke="#1a2d4a" stroke-width="0.5"/>
+
+  <!-- Pipeline horizontal -->
+  <rect x="3" y="14" width="26" height="4" rx="2" fill="url(#pipe)" filter="url(#glow)" opacity="0.9"/>
+
+  <!-- Pipeline vertical (junction) -->
+  <rect x="14" y="4" width="4" height="24" rx="2" fill="url(#pipe)" filter="url(#glow)" opacity="0.9"/>
+
+  <!-- Center node -->
+  <circle cx="16" cy="16" r="3.5" fill="#030a14" stroke="url(#pipe)" stroke-width="1.5" filter="url(#glow)"/>
+  <circle cx="16" cy="16" r="1.5" fill="#00d4ff" opacity="0.9"/>
+
+  <!-- Corner nodes -->
+  <circle cx="3" cy="16" r="1.5" fill="#00d4ff" opacity="0.7"/>
+  <circle cx="29" cy="16" r="1.5" fill="#00d4ff" opacity="0.7"/>
+  <circle cx="16" cy="3" r="1.5" fill="#00d4ff" opacity="0.7"/>
+  <circle cx="16" cy="29" r="1.5" fill="#00d4ff" opacity="0.7"/>
+</svg>
